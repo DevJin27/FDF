@@ -41,6 +41,8 @@ export { OTPService } from "./services/otp.service.js";
 
 // Providers
 export { MSG91SMSProvider } from "./providers/msg91-sms.provider.js";
+// ConsoleSMSProvider — dev-only, logs OTP to stdout instead of sending a real SMS
+export { ConsoleSMSProvider } from "./providers/console-sms.provider.js";
 
 // Session
 export {

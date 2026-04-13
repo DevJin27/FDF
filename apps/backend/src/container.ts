@@ -3,7 +3,8 @@ import {
   OTPCodeRepository,
   OTPService,
   UserRepository,
-  MSG91SMSProvider,
+  // MSG91SMSProvider,   ← OTP integration disabled for now
+  ConsoleSMSProvider,   //   using console provider instead (logs OTP to terminal)
 } from "@fdf/domain";
 import type { IOTPService, IOTPStore, ISMSProvider, IUserRepository } from "@fdf/domain";
 import type { Database } from "@fdf/db";
@@ -24,26 +25,31 @@ function requireEnv(key: string): string {
   return val;
 }
 
-function optionalEnv(key: string, fallback: string): string {
-  return process.env[key] ?? fallback;
-}
+// function optionalEnv(key: string, fallback: string): string {
+//   return process.env[key] ?? fallback;
+// }
 
 export function createContainer(
   overrides: Partial<AppContainer> = {},
 ): AppContainer {
   const db = overrides.db ?? createDb(requireEnv("DATABASE_URL"));
 
-  const smsProvider =
+  // ── OTP / SMS provider ─────────────────────────────────────────────────────
+  // OTP integration via MSG91 is temporarily disabled.
+  // To re-enable, swap ConsoleSMSProvider for MSG91SMSProvider and
+  // restore the requireEnv calls for MSG91_AUTH_KEY, MSG91_SENDER_ID, MSG91_DLT_TE_ID.
+  const smsProvider: ISMSProvider =
     overrides.smsProvider ??
-    new MSG91SMSProvider({
-      authKey: requireEnv("MSG91_AUTH_KEY"),
-      senderId: requireEnv("MSG91_SENDER_ID"),
-      dltTemplateId: requireEnv("MSG91_DLT_TE_ID"),
-      messageTemplate: optionalEnv(
-        "MSG91_OTP_MESSAGE_TEMPLATE",
-        "<#> Your FDF OTP is {otp}. It expires in 5 minutes.",
-      ),
-    });
+    new ConsoleSMSProvider();
+  //  new MSG91SMSProvider({
+  //    authKey: requireEnv("MSG91_AUTH_KEY"),
+  //    senderId: requireEnv("MSG91_SENDER_ID"),
+  //    dltTemplateId: requireEnv("MSG91_DLT_TE_ID"),
+  //    messageTemplate: optionalEnv(
+  //      "MSG91_OTP_MESSAGE_TEMPLATE",
+  //      "<#> Your FDF OTP is {otp}. It expires in 5 minutes.",
+  //    ),
+  //  });
 
   const otpStore = overrides.otpStore ?? new OTPCodeRepository(db);
   const userRepository = overrides.userRepository ?? new UserRepository(db);
