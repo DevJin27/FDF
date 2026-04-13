@@ -4,9 +4,20 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { User, LogOut, Flame, Shield, Activity, Edit3 } from "lucide-react";
 import { api } from "@/lib/api-client";
-import type { UserProfile } from "@fdf/domain";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+// Inline type — mirrors the UserProfile from @fdf/domain
+type UserProfile = {
+  id: string;
+  phone: string;
+  name: string;
+  upi_id: string | null;
+  fdf_streak: number;
+  fdf_unlocked_until: Date | null;
+  created_at: Date;
+};
+
 import {
   Card,
   CardHeader,

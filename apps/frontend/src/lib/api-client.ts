@@ -1,4 +1,17 @@
-import type { ApiBody, SessionUser, UserProfile } from "@fdf/domain";
+// Inline types — mirror shapes from @fdf/domain to avoid cross-app module resolution issues
+type SessionUser = { id: string; phone: string; name: string };
+type UserProfile = {
+  id: string;
+  phone: string;
+  name: string;
+  upi_id: string | null;
+  fdf_streak: number;
+  fdf_unlocked_until: Date | null;
+  created_at: Date;
+};
+type ApiSuccessBody<T> = { success: true; data: T };
+type ApiErrorBody = { success: false; error: { message: string; code: string } };
+type ApiBody<T> = ApiSuccessBody<T> | ApiErrorBody;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
