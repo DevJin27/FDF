@@ -1,28 +1,17 @@
 {
   "name": "fdf",
-  "version": "0.1.0",
   "private": true,
-  "engines": {
-    "node": ">=20.0.0"
+  "version": "1.0.0",
+  "description": "Free Delivery Forever — order-clubbing monorepo",
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail \"npm run dev -w api\" \"npm run dev -w web\"",
+    "build": "npm run build -w api && npm run build -w web",
+    "lint": "npm run lint -w api && npm run lint -w web"
   },
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "apps/*"
   ],
-  "scripts": {
-    "dev": "concurrently \"npm run dev -w apps/frontend\" \"npm run dev -w apps/backend\"",
-    "dev:frontend": "npm run dev -w apps/frontend",
-    "dev:backend": "npm run dev -w apps/backend",
-    "build": "npm run build -w packages/db && npm run build -w packages/domain && npm run build -w apps/backend && npm run build -w apps/frontend",
-    "typecheck": "tsc -p tsconfig.base.json --noEmit && npm run typecheck -w apps/frontend && npm run typecheck -w apps/backend",
-    "test": "vitest run",
-    "db:generate": "npm run db:generate -w packages/db",
-    "db:push": "npm run db:push -w packages/db",
-    "db:migrate": "npm run db:migrate -w packages/db"
-  },
   "devDependencies": {
-    "concurrently": "^9.1.2",
-    "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "concurrently": "^8.2.2"
   }
 }

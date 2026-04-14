@@ -1,24 +1,18 @@
-# Dependencies
 node_modules
-
-# Build outputs
-dist
-.next
-*.tsbuildinfo
 
 # Environment
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
-# Drizzle
-drizzle/
+# Build output
+.next
+dist
+out
+coverage
 
-# Editor
-.DS_Store
-.vscode
-*.swp
-
-# Logs
+# Logs and caches
 *.log
-npm-debug.log*
+.turbo
+.cache
+.DS_Store
