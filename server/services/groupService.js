@@ -1,6 +1,14 @@
 const { v4: uuid } = require('uuid');
 const state = require('../state');
 
+function getIo() {
+  try {
+    return require('../index').io;
+  } catch (error) {
+    return null;
+  }
+}
+
 function getAllGroups() {
   if (typeof state.getAllGroups === 'function') {
     return state.getAllGroups();
@@ -131,9 +139,64 @@ function leaveGroup({ groupId, userId }) {
   return hostChange;
 }
 
+function promoteNextHost(groupId) {
+  const group = state.getGroup(groupId);
+  if (!group) {
+    throw new Error('Group not found');
+  }
+
+  const nextHost =
+    group.participants.find(
+      (participant) => participant.online === true && participant.id !== group.hostId
+    ) || null;
+
+  if (!nextHost) {
+    lockGroup(groupId);
+    return null;
+  }
+
+  group.hostId = nextHost.id;
+  group.hostName = nextHost.name;
+  group.participants = group.participants.map((participant) => ({
+    ...participant,
+    isHost: participant.id === nextHost.id,
+  }));
+
+  state.updateGroup(group.id, group);
+
+  const io = getIo();
+  if (io) {
+    io.to(group.id).emit('host_changed', {
+      newHostId: nextHost.id,
+      newHostName: nextHost.name,
+    });
+  }
+
+  return { newHostId: nextHost.id };
+}
+
+function lockGroup(groupId) {
+  const group = state.getGroup(groupId);
+  if (!group) {
+    throw new Error('Group not found');
+  }
+
+  group.status = 'locked';
+  state.updateGroup(group.id, group);
+
+  const io = getIo();
+  if (io) {
+    io.to(group.id).emit('group_locked', { groupId: group.id });
+  }
+
+  return group;
+}
+
 module.exports = {
   generateCode,
   createGroup,
   joinGroup,
   leaveGroup,
+  promoteNextHost,
+  lockGroup,
 };
