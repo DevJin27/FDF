@@ -74,7 +74,66 @@ function createGroup({ name, address, hostId, hostName }) {
   return group;
 }
 
+function joinGroup({ code, userId, userName }) {
+  const groups = getAllGroups();
+  const normalizedCode = String(code || '').toUpperCase();
+  const group =
+    Object.values(groups).find((candidate) => candidate && candidate.code === normalizedCode) || null;
+
+  if (!group) {
+    throw new Error('Group not found');
+  }
+
+  if (group.status !== 'open') {
+    throw new Error('Group is locked');
+  }
+
+  if (group.participants.length >= 10) {
+    throw new Error('Group is full');
+  }
+
+  if (group.participants.some((participant) => participant.id === userId)) {
+    throw new Error('Already in group');
+  }
+
+  group.participants.push({
+    id: userId,
+    name: userName,
+    joinedAt: Date.now(),
+    online: true,
+    isHost: false,
+  });
+
+  state.updateGroup(group.id, group);
+  return group;
+}
+
+function leaveGroup({ groupId, userId }) {
+  const group = state.getGroup(groupId);
+  if (!group) {
+    throw new Error('Group not found');
+  }
+
+  const participant = group.participants.find((candidate) => candidate.id === userId);
+  if (!participant) {
+    return null;
+  }
+
+  participant.online = false;
+
+  let hostChange = null;
+  if (userId === group.hostId) {
+    hostChange = promoteNextHost(groupId);
+  } else {
+    state.updateGroup(group.id, group);
+  }
+
+  return hostChange;
+}
+
 module.exports = {
   generateCode,
   createGroup,
+  joinGroup,
+  leaveGroup,
 };
