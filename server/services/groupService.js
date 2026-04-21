@@ -83,10 +83,7 @@ function createGroup({ name, address, hostId, hostName }) {
 }
 
 function joinGroup({ code, userId, userName }) {
-  const groups = getAllGroups();
-  const normalizedCode = String(code || '').toUpperCase();
-  const group =
-    Object.values(groups).find((candidate) => candidate && candidate.code === normalizedCode) || null;
+  const group = getGroupByCode(code);
 
   if (!group) {
     throw new Error('Group not found');
@@ -114,6 +111,13 @@ function joinGroup({ code, userId, userName }) {
 
   state.updateGroup(group.id, group);
   return group;
+}
+
+function getGroupByCode(code) {
+  const groups = getAllGroups();
+  const normalizedCode = String(code || '').toUpperCase();
+
+  return Object.values(groups).find((group) => group && group.code === normalizedCode) || null;
 }
 
 function leaveGroup({ groupId, userId }) {
@@ -192,6 +196,41 @@ function lockGroup(groupId) {
   return group;
 }
 
+function setUpiId({ groupId, upiId, hostName }) {
+  const group = state.getGroup(groupId);
+  if (!group) {
+    throw new Error('Group not found');
+  }
+
+  group.settlement = {
+    ...(group.settlement || {}),
+    upiId,
+    hostName,
+  };
+
+  state.updateGroup(group.id, group);
+  return group;
+}
+
+function markPaid({ groupId, userId }) {
+  const group = state.getGroup(groupId);
+  if (!group) {
+    throw new Error('Group not found');
+  }
+
+  const existingSettlement = group.settlement || {};
+  group.settlement = {
+    ...existingSettlement,
+    payments: {
+      ...(existingSettlement.payments || {}),
+      [userId]: 'paid',
+    },
+  };
+
+  state.updateGroup(group.id, group);
+  return group;
+}
+
 module.exports = {
   generateCode,
   createGroup,
@@ -199,4 +238,7 @@ module.exports = {
   leaveGroup,
   promoteNextHost,
   lockGroup,
+  getGroupByCode,
+  setUpiId,
+  markPaid,
 };
