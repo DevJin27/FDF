@@ -1,0 +1,289 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0" pages="4">
+  <diagram id="usecase-simple" name="1 UML Use Case (Simple)">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="h" value="Host" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="180" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="m" value="Member" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="360" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="sys" value="FDF System" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="200" y="80" width="1080" height="620" as="geometry" />
+        </mxCell>
+        <mxCell id="u1" value="Login (OTP)" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="280" y="130" width="180" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="u2" value="Create Session" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="520" y="130" width="180" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="u3" value="Join Session" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="760" y="130" width="180" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="u4" value="Add Cart Item" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="130" width="180" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="u5" value="Lock Session" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="280" y="300" width="180" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="u6" value="Create Order" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="520" y="300" width="180" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="u7" value="View Settlement" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="760" y="300" width="180" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="u8" value="Mark Paid" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="300" width="180" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="h" target="u1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="m" target="u1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="h" target="u2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="h" target="u5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="h" target="u6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="h" target="u7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="h" target="u8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="m" target="u3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="m" target="u4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="m" target="u7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="class-simple" name="2 Class Diagram (Simple)">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c1" value="SessionService" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="140" width="180" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c2" value="OrderService" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="260" width="180" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c3" value="SettlementService" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="380" width="180" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="r1" value="SessionRepository" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;" vertex="1" parent="1">
+          <mxGeometry x="430" y="140" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="r2" value="OrderRepository" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;" vertex="1" parent="1">
+          <mxGeometry x="430" y="260" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="r3" value="SettlementRepository" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;" vertex="1" parent="1">
+          <mxGeometry x="430" y="380" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="p1" value="EventBus" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;" vertex="1" parent="1">
+          <mxGeometry x="760" y="140" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" value="SessionFactory" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;" vertex="1" parent="1">
+          <mxGeometry x="760" y="240" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" value="OrderFactory" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;" vertex="1" parent="1">
+          <mxGeometry x="760" y="340" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="d1" value="PrismaClient" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="240" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="d2" value="PostgreSQL" style="shape=cylinder;whiteSpace=wrap;html=1;fillColor=#f8cecc;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="360" width="170" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ce1" edge="1" parent="1" source="c1" target="r1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ce2" edge="1" parent="1" source="c1" target="p1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ce3" edge="1" parent="1" source="c2" target="r2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ce4" edge="1" parent="1" source="c2" target="c3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ce5" edge="1" parent="1" source="c3" target="r3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ce6" edge="1" parent="1" source="r1" target="p2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ce7" edge="1" parent="1" source="r2" target="p3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ce8" edge="1" parent="1" source="r1" target="d1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ce9" edge="1" parent="1" source="r2" target="d1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ce10" edge="1" parent="1" source="r3" target="d1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ce11" edge="1" parent="1" source="d1" target="d2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="seq-simple" name="3 Sequence Diagram (Simple)">
+    <mxGraphModel dx="1174" dy="789" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="s_user" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;" value="User" vertex="1">
+          <mxGeometry height="40" width="110" x="100" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="s_web" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;" value="Web" vertex="1">
+          <mxGeometry height="40" width="110" x="320" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="s_api" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;" value="API" vertex="1">
+          <mxGeometry height="40" width="110" x="540" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="s_db" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;" value="DB" vertex="1">
+          <mxGeometry height="40" width="110" x="760" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sl1" edge="1" parent="1" source="s_user" style="endArrow=classic;html=1;" target="s_web" value="1. Login">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sl2" edge="1" parent="1" source="s_web" style="endArrow=classic;html=1;" target="s_api" value="2. Verify OTP">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="150" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sl3" edge="1" parent="1" source="s_api" style="endArrow=classic;html=1;" target="s_db" value="3. Upsert User">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="190" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sl4" edge="1" parent="1" source="s_api" style="endArrow=open;dashed=1;html=1;" target="s_web" value="4. Token">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="230" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sl5" edge="1" parent="1" source="s_user" style="endArrow=classic;html=1;" target="s_web" value="5. Create Session">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="260" y="300" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sl6" edge="1" parent="1" source="s_web" style="endArrow=classic;html=1;" target="s_api" value="6. POST /sessions">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sl7" edge="1" parent="1" source="s_api" style="endArrow=classic;html=1;" target="s_db" value="7. Insert Session + Member">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="380" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sl8" edge="1" parent="1" source="s_user" style="endArrow=classic;html=1;" target="s_web" value="8. Create Order">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="260" y="470" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sl9" edge="1" parent="1" source="s_web" style="endArrow=classic;html=1;" target="s_api" value="9. POST /order">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="510" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sl10" edge="1" parent="1" source="s_api" style="endArrow=classic;html=1;" target="s_db" value="10. Insert Order + Settlement">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="550" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="er-simple" name="4 ER Diagram (Simple + Aligned)">
+    <mxGraphModel dx="903" dy="607" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="er_user" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=10;" value="USER&#xa;PK id&#xa;phone&#xa;name" vertex="1">
+          <mxGeometry height="120" width="180" x="100" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="er_session" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=10;" value="SESSION&#xa;PK id&#xa;FK leaderId&#xa;code&#xa;status" vertex="1">
+          <mxGeometry height="140" width="200" x="360" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="er_member" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=10;" value="MEMBER&#xa;PK id&#xa;FK sessionId&#xa;FK userId" vertex="1">
+          <mxGeometry height="120" width="210" x="640" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="er_cart" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=10;" value="CART_ITEM&#xa;PK id&#xa;FK sessionId&#xa;FK memberId&#xa;price&#xa;quantity" vertex="1">
+          <mxGeometry height="160" width="230" x="930" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="er_order" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=10;" value="ORDER&#xa;PK id&#xa;FK sessionId&#xa;subtotal&#xa;status" vertex="1">
+          <mxGeometry height="140" width="200" x="360" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="er_settle" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=10;" value="SETTLEMENT&#xa;PK id&#xa;FK sessionId&#xa;FK memberId&#xa;amountOwed&#xa;paid" vertex="1">
+          <mxGeometry height="160" width="230" x="640" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="er_streak" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=10;" value="STREAK&#xa;PK id&#xa;FK userId&#xa;count" vertex="1">
+          <mxGeometry height="120" width="180" x="100" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="re1" edge="1" parent="1" source="er_user" style="endArrow=ERmany;startArrow=ERone;startFill=0;endFill=0;" target="er_session" value="1:N">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2" edge="1" parent="1" source="er_user" style="endArrow=ERmany;startArrow=ERone;startFill=0;endFill=0;" target="er_member" value="1:N">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re3" edge="1" parent="1" source="er_session" style="endArrow=ERmany;startArrow=ERone;startFill=0;endFill=0;" target="er_member" value="1:N">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re4" edge="1" parent="1" source="er_session" style="endArrow=ERmany;startArrow=ERone;startFill=0;endFill=0;" target="er_cart" value="1:N">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re5" edge="1" parent="1" source="er_member" style="endArrow=ERmany;startArrow=ERone;startFill=0;endFill=0;" target="er_cart" value="1:N">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re6" edge="1" parent="1" source="er_session" style="endArrow=ERone;startArrow=ERone;startFill=0;endFill=0;" target="er_order" value="1:1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re7" edge="1" parent="1" source="er_session" style="endArrow=ERmany;startArrow=ERone;startFill=0;endFill=0;" target="er_settle" value="1:N">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re8" edge="1" parent="1" source="er_member" style="endArrow=ERmany;startArrow=ERone;startFill=0;endFill=0;" target="er_settle" value="1:N">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re9" edge="1" parent="1" source="er_user" style="endArrow=ERone;startArrow=ERone;startFill=0;endFill=0;" target="er_streak" value="1:1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
