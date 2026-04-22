@@ -1,10 +1,6 @@
 const express = require("express");
-const { createGroup, getGroup, updateGroup } = require("../state");
-
-const GROUP_TTL_MS = 20 * 60 * 1000;
-const MAX_PARTICIPANTS = 10;
-const GROUP_CODE_LENGTH = 6;
-const GROUP_CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+const groupService = require("../services/groupService");
+const { getGroup } = require("../state");
 
 function createHttpError(status, message) {
   const error = new Error(message);
@@ -12,86 +8,19 @@ function createHttpError(status, message) {
   return error;
 }
 
-function isExpired(group) {
-  return Date.now() >= group.expiresAt;
-}
-
-function generateGroupCode() {
-  let code = "";
-  for (let index = 0; index < GROUP_CODE_LENGTH; index += 1) {
-    const charIndex = Math.floor(Math.random() * GROUP_CODE_CHARS.length);
-    code += GROUP_CODE_CHARS[charIndex];
-  }
-
-  return code;
-}
-
-function generateUniqueGroupCode() {
-  let code = generateGroupCode();
-
-  while (getGroup(code)) {
-    code = generateGroupCode();
-  }
-
-  return code;
-}
-
-function ensureGroupIsJoinable(group) {
-  if (!group) {
-    throw createHttpError(404, "Group not found");
-  }
-
-  if (group.status !== "open") {
-    throw createHttpError(400, "Group is locked");
-  }
-
-  if (isExpired(group)) {
-    updateGroup(group.id, { status: "locked" });
-    throw createHttpError(400, "Group has expired");
-  }
-}
-
 function createGroupsRouter() {
   const router = express.Router();
 
+  // POST /  →  create a new group
   router.post("/", (req, res, next) => {
     try {
-      const { name, address, hostName, hostId } = req.body || {};
+      const { name, address, hostId, hostName } = req.body || {};
 
-      if (!name || !address || !hostName || !hostId) {
-        throw createHttpError(400, "name, address, hostName, and hostId are required");
+      if (!name || !address || !hostId || !hostName) {
+        throw createHttpError(400, "name, address, hostId, and hostName are required");
       }
 
-      const now = Date.now();
-      const code = generateUniqueGroupCode();
-
-      const group = createGroup({
-        id: code,
-        code,
-        name: String(name).trim(),
-        address: String(address).trim(),
-        hostId,
-        status: "open",
-        createdAt: now,
-        expiresAt: now + GROUP_TTL_MS,
-        warningSentAt: null,
-        participants: [
-          {
-            id: hostId,
-            name: String(hostName).trim(),
-            joinedAt: now,
-            lastSeen: now,
-            online: true,
-          },
-        ],
-        cart: [],
-        deliveryFee: 40,
-        settlement: {
-          upiId: "",
-          hostName: String(hostName).trim(),
-          payments: {},
-        },
-      });
+      const group = groupService.createGroup({ name, address, hostId, hostName });
 
       res.status(201).json({
         groupId: group.id,
@@ -103,6 +32,7 @@ function createGroupsRouter() {
     }
   });
 
+  // POST /join  →  join an existing group by code
   router.post("/join", (req, res, next) => {
     try {
       const { code, userId, userName } = req.body || {};
@@ -111,58 +41,14 @@ function createGroupsRouter() {
         throw createHttpError(400, "code, userId, and userName are required");
       }
 
-      const group = getGroup(String(code).trim().toUpperCase());
-      ensureGroupIsJoinable(group);
-
-      const existingParticipant = group.participants.find((participant) => participant.id === userId);
-      const now = Date.now();
-
-      if (!existingParticipant && group.participants.length >= MAX_PARTICIPANTS) {
-        throw createHttpError(400, "Group is full");
-      }
-
-      const nextGroup = updateGroup(group.id, (currentGroup) => {
-        const participantIndex = currentGroup.participants.findIndex((participant) => participant.id === userId);
-
-        if (participantIndex >= 0) {
-          const participants = currentGroup.participants.map((participant, index) =>
-            index === participantIndex
-              ? {
-                  ...participant,
-                  name: String(userName).trim(),
-                  lastSeen: now,
-                  online: true,
-                }
-              : participant,
-          );
-
-          return {
-            ...currentGroup,
-            participants,
-          };
-        }
-
-        return {
-          ...currentGroup,
-          participants: [
-            ...currentGroup.participants,
-            {
-              id: userId,
-              name: String(userName).trim(),
-              joinedAt: now,
-              lastSeen: now,
-              online: true,
-            },
-          ],
-        };
-      });
-
-      res.json({ group: nextGroup });
+      const group = groupService.joinGroup({ code, userId, userName });
+      res.json({ group });
     } catch (error) {
       next(error);
     }
   });
 
+  // GET /:id  →  fetch group snapshot
   router.get("/:id", (req, res, next) => {
     try {
       const group = getGroup(req.params.id);
@@ -172,6 +58,65 @@ function createGroupsRouter() {
       }
 
       res.json({ group });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /:id/lock  →  host locks the group
+  router.post("/:id/lock", (req, res, next) => {
+    try {
+      const { userId } = req.body || {};
+      const group = getGroup(req.params.id);
+
+      if (!group) {
+        throw createHttpError(404, "Group not found");
+      }
+
+      if (userId !== group.hostId) {
+        throw createHttpError(403, "Only host can lock group");
+      }
+
+      groupService.lockGroup(req.params.id);
+      res.json({ status: "locked" });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /:id/upi  →  host sets UPI ID for settlement
+  router.post("/:id/upi", (req, res, next) => {
+    try {
+      const { upiId, hostName, userId } = req.body || {};
+      const group = getGroup(req.params.id);
+
+      if (!group) {
+        throw createHttpError(404, "Group not found");
+      }
+
+      if (userId !== group.hostId) {
+        throw createHttpError(403, "Only host can set UPI ID");
+      }
+
+      groupService.setUpiId({ groupId: req.params.id, upiId, hostName });
+      res.json({ ok: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /:id/paid  →  mark a member as paid
+  router.post("/:id/paid", (req, res, next) => {
+    try {
+      const { userId } = req.body || {};
+      const group = getGroup(req.params.id);
+
+      if (!group) {
+        throw createHttpError(404, "Group not found");
+      }
+
+      groupService.markPaid({ groupId: req.params.id, userId });
+      res.json({ ok: true });
     } catch (error) {
       next(error);
     }

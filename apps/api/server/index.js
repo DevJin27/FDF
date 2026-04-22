@@ -71,3 +71,5 @@ setInterval(() => {
 server.listen(port, () => {
   console.log(`Blinkit group backend listening on port ${port}`);
 });
+
+module.exports = { io };
