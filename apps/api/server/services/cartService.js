@@ -14,7 +14,7 @@ function normalizeName(itemName) {
   return String(itemName)
     .toLowerCase()
     .replace(UNIT_PATTERN, " ")
-    .replace(/[()\-_,]+/g, " ")
+    .replace(/[^a-z0-9\s]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -77,6 +77,66 @@ function findMatchingItem(cart, normalizedName) {
     cart.find((item) => levenshtein(item.normalizedName, normalizedName) <= 2) ||
     null
   );
+}
+
+function getPotentialMatchResult(cart, normalizedName) {
+  const exactMatch = cart.find((item) => item.normalizedName === normalizedName);
+  if (exactMatch) {
+    return {
+      match: exactMatch,
+      confidence: "high",
+    };
+  }
+
+  const containsMatch = cart.find(
+    (item) =>
+      item.normalizedName.includes(normalizedName) || normalizedName.includes(item.normalizedName),
+  );
+  if (containsMatch) {
+    return {
+      match: containsMatch,
+      confidence: "high",
+    };
+  }
+
+  let bestHighMatch = null;
+  let bestLowMatch = null;
+  let bestHighDistance = Infinity;
+  let bestLowDistance = Infinity;
+
+  cart.forEach((item) => {
+    const distance = levenshtein(item.normalizedName, normalizedName);
+
+    if (distance <= 2 && distance < bestHighDistance) {
+      bestHighMatch = item;
+      bestHighDistance = distance;
+      return;
+    }
+
+    if (distance <= 5 && distance < bestLowDistance) {
+      bestLowMatch = item;
+      bestLowDistance = distance;
+    }
+  });
+
+  if (bestHighMatch) {
+    return {
+      match: bestHighMatch,
+      confidence: "high",
+    };
+  }
+
+  if (bestLowMatch) {
+    return {
+      match: bestLowMatch,
+      confidence: "low",
+    };
+  }
+
+  return {
+    match: null,
+    confidence: "none",
+  };
 }
 
 function getRequiredGroup(groupId) {
@@ -257,30 +317,7 @@ function getPotentialMatch({ groupId, itemName }) {
 
   const group = getRequiredGroup(groupId);
   const normalizedName = getNormalizedItemName(itemName);
-
-  if (findMatchingItem(group.cart, normalizedName)) {
-    return {
-      match: null,
-      confidence: "none",
-    };
-  }
-
-  let match = null;
-  let closestDistance = Infinity;
-
-  group.cart.forEach((item) => {
-    const distance = levenshtein(item.normalizedName, normalizedName);
-
-    if (distance >= 3 && distance <= 5 && distance < closestDistance) {
-      match = item;
-      closestDistance = distance;
-    }
-  });
-
-  return {
-    match,
-    confidence: match ? "low" : "none",
-  };
+  return getPotentialMatchResult(group.cart, normalizedName);
 }
 
 module.exports = {
@@ -289,6 +326,7 @@ module.exports = {
   getCart,
   getCartTotals,
   getPotentialMatch,
+  getPotentialMatchResult,
   levenshtein,
   normalizeName,
   removeItem,
