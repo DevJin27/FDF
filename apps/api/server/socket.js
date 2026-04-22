@@ -1,21 +1,7 @@
+const { getCartTotals } = require("./services/cartService");
 const { getGroup, getGroups, updateGroup } = require("./state");
 
 const socketMemberships = new Map();
-
-function getCartTotals(cart) {
-  return cart.reduce(
-    (totals, item) => ({
-      itemCount: totals.itemCount + 1,
-      totalUnits: totals.totalUnits + item.totalQty,
-      cartTotal: Number((totals.cartTotal + item.totalPrice).toFixed(2)),
-    }),
-    {
-      itemCount: 0,
-      totalUnits: 0,
-      cartTotal: 0,
-    },
-  );
-}
 
 function rememberMembership(socketId, membership) {
   const memberships = socketMemberships.get(socketId) || [];
