@@ -19,10 +19,10 @@ One person (the host) places the final order manually on Blinkit using the expor
 
 | Person   | Module              | Files                                                      |
 |----------|---------------------|------------------------------------------------------------|
-| Dev      | Backend core + WS   | `server/index.js`, `server/state.js`, `server/socket.js`  |
-| Abhiman  | Group service       | `server/services/groupService.js`, `server/routes/groups.js` |
-| Parrv    | Cart engine         | `server/services/cartService.js`, `server/routes/cart.js` |
-| Gargi    | Split engine        | `server/services/splitService.js`, `server/routes/split.js` |
+| Dev      | Backend core + WS   | `apps/api/server/index.js`, `apps/api/server/state.js`, `apps/api/server/socket.js`  |
+| Abhiman  | Group service       | `apps/api/server/services/groupService.js`, `apps/api/server/routes/groups.js` |
+| Parrv    | Cart engine         | `apps/api/server/services/cartService.js`, `apps/api/server/routes/cart.js` |
+| Gargi    | Split engine        | `apps/api/server/services/splitService.js`, `apps/api/server/routes/split.js` |
 | Agrima   | Group UI            | `pages/index.jsx`, `pages/group/[id].jsx`, `hooks/useGroup.js` |
 | Bhawana  | Cart + Settlement UI| `pages/group/[id]/cart.jsx`, `pages/group/[id]/settle.jsx` |
 
@@ -32,7 +32,7 @@ One person (the host) places the final order manually on Blinkit using the expor
 
 ```
 grouporder/
-├── server/
+├── apps/api/server/
 │   ├── index.js              ← Express app, Socket.IO init, route mounting
 │   ├── state.js              ← In-memory store + groups.json persistence
 │   ├── socket.js             ← All WebSocket event handlers
@@ -57,7 +57,7 @@ grouporder/
 │           ├── cart.jsx      ← Cart: add items, live cart view (Bhawana)
 │           └── settle.jsx    ← Settlement: split view, UPI pay (Bhawana)
 │
-├── groups.json               ← Auto-generated. DO NOT edit manually.
+├── apps/api/server/groups.json ← Auto-generated. DO NOT edit manually.
 ├── PLAN.md                   ← This file.
 └── .env.local                ← NEXT_PUBLIC_API_URL=http://localhost:4000
 ```
@@ -94,7 +94,7 @@ This is the single source of truth. All modules read and write this shape.
   "ABC123": {
 
     // --- Identity ---
-    id: "uuid-string",
+    id: "ABC123",               // same as code
     code: "ABC123",              // 6-char alphanumeric, used to join
     name: "Late night snacks",
     address: "Hostel A gate",    // delivery address, set at creation
@@ -331,7 +331,7 @@ Both Agrima (group room) and Bhawana (settle page) generate this. Keep the forma
 
 - No Blinkit API. Host places the order manually.
 - No authentication. `userId` is a UUID generated client-side and stored in `localStorage`.
-- No database. All state is in-memory, backed by `groups.json` on disk.
+- No database. All state is in-memory, backed by `apps/api/server/groups.json` on disk.
 - Max 10 users per group.
 - Same college = same Blinkit delivery zone. Availability is not a concern.
 - Frontend: Next.js + Tailwind. No external UI component libraries.
