@@ -269,6 +269,16 @@ export default function GroupRoomPage() {
               <p className="mt-2 text-2xl font-semibold text-[#151515]">₹{Math.round(cartTotal)}</p>
             </div>
           </div>
+
+          {group.status !== "open" ? (
+            <button
+              type="button"
+              onClick={() => router.push(`/group/${group.id}/settle`)}
+              className="mt-4 w-full rounded-2xl bg-[#FFD000] px-4 py-3 text-sm font-semibold text-black transition hover:brightness-95"
+            >
+              View settlement →
+            </button>
+          ) : null}
         </section>
 
         {isHost && group.status === "locked" ? (
