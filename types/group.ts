@@ -1,13 +1,22 @@
 export type ApiTimestamp = string | number;
 
-export type PaymentMap = Record<string, number>;
+export type PaymentStatus = "paid";
+
+export type PaymentMap = Record<string, PaymentStatus>;
+
+export type Contribution = {
+  userId: string;
+  qty: number;
+};
 
 export type CartItem = {
-  id?: string;
+  id: string;
   displayName: string;
+  normalizedName: string;
+  pricePerUnit: number;
+  contributions: Contribution[];
   totalQty: number;
   totalPrice: number;
-  [key: string]: unknown;
 };
 
 export type Participant = {
@@ -55,13 +64,69 @@ export type JoinGroupResponse = {
   group: Group;
 };
 
+export type CartTotals = {
+  itemCount: number;
+  totalUnits: number;
+  cartTotal: number;
+};
+
+export type CartResponse = {
+  cart: CartItem[];
+  totals: CartTotals;
+};
+
+export type CartAddResponse = {
+  item: CartItem;
+  merged: boolean;
+  cart: CartItem[];
+  totals: CartTotals;
+};
+
+export type CartRemoveResponse = {
+  cart: CartItem[];
+  totals: CartTotals;
+};
+
+export type DuplicateCheckResponse = {
+  match: CartItem | null;
+  confidence: "high" | "low" | "none";
+};
+
 export type CartUpdatedPayload = {
   cart: CartItem[];
-  totals: {
-    itemCount: number;
-    totalUnits: number;
-    cartTotal: number;
-  };
+  totals: CartTotals;
+};
+
+export type SplitParticipant = {
+  userId: string;
+  userName: string;
+  isHost: boolean;
+  itemsTotal: string;
+  deliveryShare: string;
+  grandTotal: string;
+  owesTo: string | null;
+  owesAmount: string | null;
+  upiLink: string | null;
+};
+
+export type SplitResponse = {
+  participants: SplitParticipant[];
+  cartTotal: string;
+  deliveryFee: string;
+  grandTotal: string;
+  hostId: string;
+  hostName: string;
+};
+
+export type SplitSummaryItem = {
+  name: string;
+  owes: string;
+  upiLink: string | null;
+};
+
+export type SplitSummaryResponse = {
+  breakdown: SplitSummaryItem[];
+  hostCollects: string;
 };
 
 export type HostChangedPayload = {

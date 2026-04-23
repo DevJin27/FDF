@@ -1,4 +1,4 @@
-import type { CartItem, Group, Participant } from "@/types/group";
+import type { CartItem, Contribution, Group, Participant } from "@/types/group";
 
 export const GROUP_API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
@@ -37,10 +37,22 @@ export function normalizeParticipant(value: Partial<Participant>): Participant {
   };
 }
 
+function normalizeContribution(value: Partial<Contribution>): Contribution {
+  return {
+    userId: String(value.userId ?? ""),
+    qty: Number(value.qty ?? 0),
+  };
+}
+
 export function normalizeCartItem(item: Partial<CartItem>): CartItem {
   return {
-    ...item,
+    id: String(item.id ?? ""),
     displayName: String(item.displayName ?? "Untitled item"),
+    normalizedName: String(item.normalizedName ?? ""),
+    pricePerUnit: Number(item.pricePerUnit ?? 0),
+    contributions: Array.isArray(item.contributions)
+      ? item.contributions.map((contribution) => normalizeContribution(contribution))
+      : [],
     totalQty: Number(item.totalQty ?? 0),
     totalPrice: Number(item.totalPrice ?? 0),
   };
@@ -64,7 +76,16 @@ export function normalizeGroup(raw: Partial<Group>): Group {
     settlement: {
       upiId: raw.settlement?.upiId ?? null,
       hostName: raw.settlement?.hostName ?? null,
-      payments: raw.settlement?.payments ?? {},
+      payments: Object.entries(raw.settlement?.payments ?? {}).reduce<Group["settlement"]["payments"]>(
+        (payments, [userId, status]) => {
+          if (status === "paid") {
+            payments[userId] = "paid";
+          }
+
+          return payments;
+        },
+        {},
+      ),
     },
   };
 }
@@ -97,29 +118,50 @@ export function getInitials(name: string): string {
     .join("");
 }
 
+export function formatCurrency(value: number | string): string {
+  const numericValue = Number(value ?? 0);
+  const amount = Number.isFinite(numericValue) ? numericValue : 0;
+  const hasDecimals = Math.abs(amount % 1) > Number.EPSILON;
+
+  return `₹${amount.toLocaleString("en-IN", {
+    minimumFractionDigits: hasDecimals ? 2 : 0,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+function calculateParticipantTotals(group: Group, cart: CartItem[]) {
+  return group.participants.reduce<Record<string, number>>((totals, participant) => {
+    totals[participant.id] = 0;
+    return totals;
+  }, {});
+}
+
 export function buildShareLines(group: Group, cart: CartItem[]): string[] {
-  const total = calculateGrandTotal(cart, group.deliveryFee);
-  const entries = Object.entries(group.settlement.payments ?? {}).filter(([, amount]) =>
-    Number.isFinite(amount),
-  );
-
-  if (entries.length > 0) {
-    return entries.map(([participantId, amount]) => {
-      const participant = group.participants.find((item) => item.id === participantId);
-      const label = participant?.name ?? participantId;
-      const target = group.settlement.upiId ? ` to ${group.settlement.upiId}` : "";
-      return `• ${label} — ₹${Math.round(amount)}${target}`;
-    });
-  }
-
   if (!group.settlement.upiId || group.participants.length === 0) {
     return [];
   }
 
-  const share = Math.round(total / group.participants.length);
-  return group.participants.map((participant) => {
-    return `• ${participant.name} — ₹${share} to ${group.settlement.upiId}`;
+  const participantTotals = calculateParticipantTotals(group, cart);
+  cart.forEach((item) => {
+    item.contributions.forEach((contribution) => {
+      participantTotals[contribution.userId] =
+        (participantTotals[contribution.userId] ?? 0) + contribution.qty * item.pricePerUnit;
+    });
   });
+
+  const participantCount = group.participants.length;
+  const baseDeliveryShare =
+    participantCount > 0 ? Math.floor(group.deliveryFee / participantCount) : 0;
+
+  return group.participants
+    .filter((participant) => participant.id !== group.hostId)
+    .map((participant) => {
+      const itemsTotal = participantTotals[participant.id] ?? 0;
+      const share = itemsTotal + baseDeliveryShare;
+      const target = ` to ${group.settlement.upiId}`;
+
+      return `• ${participant.name} — ${formatCurrency(share)}${target}`;
+    });
 }
 
 export function buildWhatsAppMessage(group: Group, cart: CartItem[]): string {
@@ -131,11 +173,11 @@ export function buildWhatsAppMessage(group: Group, cart: CartItem[]): string {
     `📍 Deliver to: ${group.address}`,
     "",
     ...cart.map(
-      (item) => `• ${item.displayName} x${item.totalQty} — ₹${Math.round(item.totalPrice)}`,
+      (item) => `• ${item.displayName} x${item.totalQty} — ${formatCurrency(item.totalPrice)}`,
     ),
     "",
-    `🛵 Delivery: ₹${Math.round(group.deliveryFee)}`,
-    `💰 Total: ₹${Math.round(cartTotal + group.deliveryFee)}`,
+    `🛵 Delivery: ${formatCurrency(group.deliveryFee)}`,
+    `💰 Total: ${formatCurrency(cartTotal + group.deliveryFee)}`,
     "",
     ...(group.settlement.upiId ? ["💸 Pay your share:", shareLines] : []),
   ]
