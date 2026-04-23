@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
-import { calculateCartTotal, formatCountdown, getInitials, GROUP_API_URL } from "@/lib/group-client";
+import {
+  buildWhatsAppMessage,
+  calculateCartTotal,
+  formatCountdown,
+  getInitials,
+  GROUP_API_URL,
+} from "@/lib/group-client";
 
 import { useGroup } from "@/hooks/useGroup";
 
@@ -14,7 +20,11 @@ const statusStyles: Record<string, string> = {
 export default function GroupRoomPage() {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
+  const [userName, setUserName] = useState("");
   const [locking, setLocking] = useState(false);
+  const [savingUpi, setSavingUpi] = useState(false);
+  const [upiId, setUpiId] = useState("");
+  const [saveMessage, setSaveMessage] = useState("");
   const groupId = typeof router.query.id === "string" ? router.query.id : undefined;
   const { group, participants, cart, isHost, timeLeft, sessionWarning, loading } = useGroup(groupId);
 
@@ -24,7 +34,12 @@ export default function GroupRoomPage() {
     }
 
     setUserId(window.localStorage.getItem("userId"));
+    setUserName(window.localStorage.getItem("userName") ?? "");
   }, []);
+
+  useEffect(() => {
+    setUpiId(group?.settlement.upiId ?? "");
+  }, [group?.settlement.upiId]);
 
   async function handleLockGroup() {
     if (!groupId || !userId) {
@@ -86,6 +101,64 @@ export default function GroupRoomPage() {
   }
 
   const cartTotal = calculateCartTotal(cart);
+  const effectiveGroup = {
+    ...group,
+    settlement: {
+      ...group.settlement,
+      upiId: upiId || group.settlement.upiId,
+      hostName: userName || group.settlement.hostName,
+    },
+  };
+  const exportMessage = buildWhatsAppMessage(effectiveGroup, cart);
+
+  async function handleSaveUpi() {
+    if (!groupId || !userId || !upiId.trim()) {
+      setSaveMessage("Enter a UPI ID before saving.");
+      return;
+    }
+
+    try {
+      setSavingUpi(true);
+      setSaveMessage("");
+
+      const response = await fetch(`${GROUP_API_URL}/api/groups/${groupId}/upi`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          upiId: upiId.trim(),
+          hostName: userName || group.settlement.hostName || "Host",
+          userId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Unable to save UPI ID");
+      }
+
+      setSaveMessage("UPI ID saved. You can export the payment message now.");
+    } catch (error) {
+      console.error(error);
+      setSaveMessage("We couldn't save that UPI ID. Please try again.");
+    } finally {
+      setSavingUpi(false);
+    }
+  }
+
+  async function handleCopyMessage() {
+    try {
+      await navigator.clipboard.writeText(exportMessage);
+      setSaveMessage("Export copied to your clipboard.");
+    } catch (error) {
+      console.error(error);
+      setSaveMessage("Clipboard access failed. Try WhatsApp export instead.");
+    }
+  }
+
+  function handleWhatsAppExport() {
+    window.open(`https://wa.me/?text=${encodeURIComponent(exportMessage)}`, "_blank");
+  }
 
   return (
     <main className="min-h-screen px-4 py-6">
@@ -194,6 +267,60 @@ export default function GroupRoomPage() {
             </div>
           </div>
         </section>
+
+        {isHost && group.status === "locked" ? (
+          <section className="rounded-[28px] border border-black/5 bg-white/90 p-5 shadow-card">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#938f7d]">
+              Host handoff
+            </p>
+            <h2 className="mt-2 text-xl font-semibold text-[#151515]">Collect payment details</h2>
+            <p className="mt-2 text-sm leading-6 text-[#625e53]">
+              Save your UPI ID so the room can export the final order and payment breakdown.
+            </p>
+
+            <div className="mt-5 space-y-4">
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-[#35322a]">UPI ID</span>
+                <input
+                  value={upiId}
+                  onChange={(event) => setUpiId(event.target.value)}
+                  placeholder="priya@upi"
+                  className="w-full rounded-2xl border border-black/10 bg-[#fffdf7] px-4 py-3 outline-none transition focus:border-black/30"
+                />
+              </label>
+
+              <button
+                type="button"
+                onClick={handleSaveUpi}
+                disabled={savingUpi}
+                className="w-full rounded-2xl bg-[#FFD000] px-4 py-3 text-sm font-semibold text-black transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {savingUpi ? "Saving UPI ID..." : "Save UPI ID"}
+              </button>
+
+              {effectiveGroup.settlement.upiId ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={handleWhatsAppExport}
+                    className="rounded-2xl bg-[#151515] px-4 py-3 text-sm font-semibold text-white"
+                  >
+                    WhatsApp export
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCopyMessage}
+                    className="rounded-2xl border border-black/10 bg-[#fffaf0] px-4 py-3 text-sm font-semibold text-[#151515]"
+                  >
+                    Copy to clipboard
+                  </button>
+                </div>
+              ) : null}
+
+              {saveMessage ? <p className="text-sm text-[#625e53]">{saveMessage}</p> : null}
+            </div>
+          </section>
+        ) : null}
       </div>
     </main>
   );
