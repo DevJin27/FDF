@@ -24,6 +24,7 @@ export default function GroupRoomPage() {
   const [locking, setLocking] = useState(false);
   const [savingUpi, setSavingUpi] = useState(false);
   const [upiId, setUpiId] = useState("");
+  const [upiSaved, setUpiSaved] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const groupId = typeof router.query.id === "string" ? router.query.id : undefined;
   const { group, participants, cart, isHost, timeLeft, sessionWarning, loading } = useGroup(groupId);
@@ -39,6 +40,7 @@ export default function GroupRoomPage() {
 
   useEffect(() => {
     setUpiId(group?.settlement.upiId ?? "");
+    setUpiSaved(Boolean(group?.settlement.upiId));
   }, [group?.settlement.upiId]);
 
   async function handleLockGroup() {
@@ -128,7 +130,7 @@ export default function GroupRoomPage() {
         },
         body: JSON.stringify({
           upiId: upiId.trim(),
-          hostName: userName || group.settlement.hostName || "Host",
+          hostName: userName || effectiveGroup.settlement.hostName || "Host",
           userId,
         }),
       });
@@ -137,6 +139,7 @@ export default function GroupRoomPage() {
         throw new Error("Unable to save UPI ID");
       }
 
+      setUpiSaved(true);
       setSaveMessage("UPI ID saved. You can export the payment message now.");
     } catch (error) {
       console.error(error);
@@ -283,7 +286,10 @@ export default function GroupRoomPage() {
                 <span className="mb-2 block text-sm font-medium text-[#35322a]">UPI ID</span>
                 <input
                   value={upiId}
-                  onChange={(event) => setUpiId(event.target.value)}
+                  onChange={(event) => {
+                    setUpiId(event.target.value);
+                    setUpiSaved(false);
+                  }}
                   placeholder="priya@upi"
                   className="w-full rounded-2xl border border-black/10 bg-[#fffdf7] px-4 py-3 outline-none transition focus:border-black/30"
                 />
@@ -298,7 +304,7 @@ export default function GroupRoomPage() {
                 {savingUpi ? "Saving UPI ID..." : "Save UPI ID"}
               </button>
 
-              {effectiveGroup.settlement.upiId ? (
+              {upiSaved ? (
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"

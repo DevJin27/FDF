@@ -285,7 +285,7 @@ export default function HomePage() {
                     value={joinName}
                     onChange={(event) => setJoinName(event.target.value)}
                     placeholder="Aarav"
-                    className="w-full rounded-2xl border border-black/10 bg-[#fffdf7] px-4 py-3 uppercase-none outline-none transition focus:border-black/30"
+                    className="w-full rounded-2xl border border-black/10 bg-[#fffdf7] px-4 py-3 normal-case outline-none transition focus:border-black/30"
                   />
                 </label>
 
