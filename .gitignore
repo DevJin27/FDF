@@ -1,3 +1,11 @@
 node_modules/
 apps/api/.env
 apps/api/server/groups.json
+.next/
+dist/
+apps/web/.next/
+apps/web/.env.local
+apps/api/.env.local
+*.tsbuildinfo
+.env.local
+.env
