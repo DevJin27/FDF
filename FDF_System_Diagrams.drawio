@@ -1,0 +1,425 @@
+<mxfile version="21.6.8">
+
+  <diagram id="diag_1" name="ER Diagram">
+    <mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="erDiagram
+    USERS {
+        text id PK &quot;gen_random_uuid()::text&quot;
+        text name
+        text email UK
+        timestamp email_verified
+        text image
+        varchar upi_id
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    ACCOUNTS {
+        text user_id FK &quot;users.id CASCADE&quot;
+        text type
+        text provider PK
+        text provider_account_id PK
+        text refresh_token
+        text access_token
+        integer expires_at
+        text token_type
+        text scope
+        text id_token
+        text session_state
+    }
+
+    SESSIONS {
+        text session_token PK
+        text user_id FK &quot;users.id CASCADE&quot;
+        timestamp expires
+    }
+
+    VERIFICATION_TOKEN {
+        text identifier PK
+        text token PK
+        timestamp expires
+    }
+
+    AUTHENTICATORS {
+        text credential_id UK
+        text user_id FK &quot;users.id CASCADE&quot;
+        text provider_account_id
+        text credential_public_key
+        integer counter
+        text credential_device_type
+        boolean credential_backed_up
+        text transports
+    }
+
+    ORDER_INTENTS {
+        uuid id PK &quot;defaultRandom()&quot;
+        text user_id FK &quot;users.id CASCADE&quot;
+        integer amount
+        timestamp latest_checkout_at
+        varchar delivery_cluster &quot;hostel-a | hostel-b | main-gate | library&quot;
+        varchar status &quot;open | reserved | matched | cancelled | expired&quot;
+        uuid room_id FK &quot;match_rooms.id (nullable)&quot;
+        timestamp created_at
+        timestamp updated_at
+        timestamp cancelled_at
+        timestamp expired_at
+    }
+
+    MATCH_ROOMS {
+        uuid id PK &quot;defaultRandom()&quot;
+        text leader_user_id FK &quot;users.id CASCADE&quot;
+        varchar delivery_cluster &quot;hostel-a | hostel-b | main-gate | library&quot;
+        varchar status &quot;pending_confirmation | active | locked | completed | cancelled | expired&quot;
+        integer minimum_amount
+        integer total_amount
+        timestamp latest_checkout_at
+        timestamp created_at
+        timestamp updated_at
+        timestamp locked_at
+        timestamp completed_at
+        timestamp expired_at
+    }
+
+    MATCH_ROOM_MEMBERS {
+        uuid id PK &quot;defaultRandom()&quot;
+        uuid room_id FK &quot;match_rooms.id CASCADE&quot;
+        text user_id FK &quot;users.id CASCADE&quot;
+        uuid order_intent_id FK &quot;order_intents.id CASCADE&quot;
+        integer amount
+        timestamp created_at
+    }
+
+    SETTLEMENTS {
+        uuid id PK &quot;defaultRandom()&quot;
+        uuid room_id FK &quot;match_rooms.id CASCADE&quot;
+        text user_id FK &quot;users.id CASCADE&quot;
+        integer amount_owed
+        varchar status &quot;pending | paid&quot;
+        timestamp marked_paid_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PAYMENT_EVENTS {
+        uuid id PK &quot;defaultRandom()&quot;
+        uuid room_id FK &quot;match_rooms.id CASCADE&quot;
+        text member_user_id FK &quot;users.id CASCADE&quot;
+        text marked_by_user_id FK &quot;users.id CASCADE&quot;
+        varchar type &quot;marked_paid&quot;
+        timestamp created_at
+        text metadata
+    }
+
+    USERS ||--o{ ACCOUNTS : &quot;has&quot;
+    USERS ||--o{ SESSIONS : &quot;has&quot;
+    USERS ||--o{ AUTHENTICATORS : &quot;has&quot;
+    USERS ||--o{ ORDER_INTENTS : &quot;places&quot;
+    USERS ||--o{ MATCH_ROOM_MEMBERS : &quot;participates as&quot;
+    USERS ||--o{ SETTLEMENTS : &quot;owes&quot;
+    USERS ||--o{ PAYMENT_EVENTS : &quot;triggers / receives&quot;
+    MATCH_ROOMS ||--|{ MATCH_ROOM_MEMBERS : &quot;contains&quot;
+    MATCH_ROOMS ||--|{ SETTLEMENTS : &quot;tracks&quot;
+    MATCH_ROOMS ||--o{ PAYMENT_EVENTS : &quot;records&quot;
+    MATCH_ROOMS }o--|| USERS : &quot;led by (leader_user_id)&quot;
+    ORDER_INTENTS }o--|| USERS : &quot;belongs to&quot;
+    ORDER_INTENTS }o--o| MATCH_ROOMS : &quot;grouped into (room_id)&quot;
+    ORDER_INTENTS ||--o| MATCH_ROOM_MEMBERS : &quot;represented by&quot;
+" style="shape=mxgraph.mermaid;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="800" height="800" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram id="diag_2" name="Class Diagram">
+    <mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="classDiagram
+    class AuthenticatedUser {
+        +String id
+        +String email
+        +String name
+        +String image
+    }
+
+    class OrderIntentSummary {
+        +String id
+        +String userId
+        +Number amount
+        +String latestCheckoutAt
+        +DeliveryCluster deliveryCluster
+        +OrderIntentStatus status
+        +String createdAt
+        +String roomId
+    }
+
+    class MatchRoomSummary {
+        +String id
+        +String leaderUserId
+        +Number memberCount
+        +Number totalAmount
+        +Number minimumAmount
+        +String latestCheckoutAt
+        +MatchRoomStatus status
+        +DeliveryCluster deliveryCluster
+        +String createdAt
+    }
+
+    class SettlementView {
+        +LeaderInfo leader
+        +SettlementMemberView[] members
+    }
+
+    class SettlementMemberView {
+        +String userId
+        +String name
+        +String image
+        +Number amountOwed
+        +SettlementStatus paymentStatus
+        +String upiId
+        +Boolean isLeader
+    }
+
+    class QueueSnapshot {
+        +DeliveryCluster deliveryCluster
+        +Number openIntentCount
+        +Number totalOpenAmount
+        +Number amountToMinimum
+        +Number minimumAmount
+    }
+
+    class DomainEventBus {
+        &lt;&lt;Observer Pattern — Subject&gt;&gt;
+        +subscribe(subscriber) Function
+        +emit(name, payload) Promise
+    }
+
+    class SocketHub {
+        &lt;&lt;Observer Pattern — Concrete Subscriber&gt;&gt;
+        +register() void
+        +onEvent(name, payload) Promise
+    }
+
+    class OrderIntentRepository {
+        &lt;&lt;Repository Pattern&gt;&gt;
+        +create(input) Promise
+        +listForUser(userId) Promise
+        +listOpenByCluster(cluster, now) Promise
+        +cancel(intentId, userId) Promise
+        +markMatched(intentIds, roomId, status) Promise
+    }
+
+    class MatchRoomRepository {
+        &lt;&lt;Repository Pattern&gt;&gt;
+        +createFromIntents(input) Promise
+        +getCurrentForUser(userId) Promise
+        +findById(roomId) Promise
+        +lockRoom(roomId) Promise
+        +getSettlementView(roomId) Promise
+    }
+
+    class OrderIntentService {
+        &lt;&lt;Service Layer Pattern&gt;&gt;
+        +createIntent(user, input) Promise
+        +listMyIntents(userId) Promise
+        +cancelIntent(userId, intentId) Promise
+        +publishQueue(cluster) Promise
+    }
+
+    class MatchmakingService {
+        &lt;&lt;Strategy Pattern&gt;&gt;
+        +tryMatchCluster(cluster) Promise
+    }
+
+    class MatchRoomService {
+        &lt;&lt;Service Layer Pattern&gt;&gt;
+        +getCurrentForUser(userId) Promise
+        +getById(roomId) Promise
+        +lockRoom(user, roomId) Promise
+    }
+
+    class SettlementService {
+        &lt;&lt;Service Layer Pattern&gt;&gt;
+        +markPaid(user, roomId, memberUserId) Promise
+    }
+
+    OrderIntentService --&gt; OrderIntentRepository : uses
+    OrderIntentService --&gt; MatchmakingService : delegates match
+    OrderIntentService --&gt; DomainEventBus : emits
+
+    MatchmakingService --&gt; OrderIntentRepository : reads open intents
+    MatchmakingService --&gt; MatchRoomRepository : creates rooms
+    MatchmakingService --&gt; DomainEventBus : emits match.formed
+
+    MatchRoomService --&gt; MatchRoomRepository : uses
+    MatchRoomService --&gt; DomainEventBus : emits match.locked
+
+    SettlementService --&gt; MatchRoomRepository : validates room
+    SettlementService --&gt; DomainEventBus : emits payment.updated
+
+    SocketHub ..|&gt; DomainEventBus : subscribes to
+" style="shape=mxgraph.mermaid;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="800" height="800" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram id="diag_3" name="Sequence Diagram">
+    <mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="sequenceDiagram
+    autonumber
+
+    participant Browser as Browser
+    participant ExpressAPI as Express API
+    participant AuthMW as Auth Middleware
+    participant OIS as OrderIntentService
+    participant MMS as MatchmakingService
+    participant MRS as MatchRoomService
+    participant OIR as OrderIntentRepository
+    participant MRR as MatchRoomRepository
+    participant DB as PostgreSQL
+    participant EventBus as DomainEventBus
+    participant SocketHub as SocketHub
+
+    rect rgb(230, 255, 230)
+        Note over Browser, SocketHub: Phase 1 — Socket.IO Realtime Handshake
+        Browser-&gt;&gt;SocketHub: WS connect { auth: { token } }
+        SocketHub--&gt;&gt;Browser: connected
+        Browser-&gt;&gt;SocketHub: emit &quot;subscribe.cluster&quot; (&quot;hostel-a&quot;)
+    end
+
+    rect rgb(255, 230, 255)
+        Note over Browser, DB: Phase 2 — Create Order Intent
+        Browser-&gt;&gt;ExpressAPI: POST /api/intents
+        ExpressAPI-&gt;&gt;AuthMW: Bearer token validation
+        ExpressAPI-&gt;&gt;OIS: createIntent(user, input)
+        OIS-&gt;&gt;OIR: create({ userId, amount, latestCheckoutAt, cluster })
+        OIR-&gt;&gt;DB: INSERT order_intents
+        OIS-&gt;&gt;EventBus: emit(&quot;intent.created&quot;, { intent })
+        OIS-&gt;&gt;EventBus: emit(&quot;queue.updated&quot;, { cluster, snapshot })
+        EventBus-&gt;&gt;SocketHub: onEvent(&quot;queue.updated&quot;, snapshot)
+        SocketHub-&gt;&gt;Browser: &quot;queue.updated&quot; event
+        
+        OIS-&gt;&gt;MMS: tryMatchCluster(cluster)
+        MMS-&gt;&gt;OIR: listOpenByCluster(cluster, now)
+        MMS-&gt;&gt;MMS: selectBestMatch(candidates, config)
+        alt Match found
+            MMS-&gt;&gt;MRR: createFromIntents(input) [DB TRANSACTION]
+            MRR-&gt;&gt;DB: INSERT match_rooms &amp; members
+            MMS-&gt;&gt;OIR: markMatched(intentIds, roomId, &quot;reserved&quot;)
+            MMS-&gt;&gt;EventBus: emit(&quot;match.formed&quot;, { roomId, userIds, cluster })
+            EventBus-&gt;&gt;SocketHub: onEvent(&quot;match.formed&quot;, ...)
+            SocketHub-&gt;&gt;Browser: &quot;match.formed&quot; -&gt; redirect
+        end
+        OIS--&gt;&gt;ExpressAPI: OrderIntentSummary
+        ExpressAPI--&gt;&gt;Browser: 201 Created
+    end
+
+    rect rgb(255, 255, 220)
+        Note over Browser, DB: Phase 3 — Lock Match Room
+        Browser-&gt;&gt;ExpressAPI: POST /api/matches/[roomId]/lock
+        ExpressAPI-&gt;&gt;MRS: lockRoom(user, roomId)
+        MRS-&gt;&gt;MRR: lockRoom(roomId)
+        MRR-&gt;&gt;DB: UPDATE match_rooms SET status=&quot;locked&quot;
+        MRS-&gt;&gt;OIR: markMatched(intentIds, roomId, &quot;matched&quot;)
+        MRS-&gt;&gt;EventBus: emit(&quot;match.locked&quot;, { roomId, leaderUserId })
+        EventBus-&gt;&gt;SocketHub: onEvent(&quot;match.locked&quot;, ...)
+        SocketHub-&gt;&gt;Browser: &quot;match.locked&quot; -&gt; refresh
+        ExpressAPI--&gt;&gt;Browser: 200 OK
+    end
+" style="shape=mxgraph.mermaid;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="800" height="800" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram id="diag_4" name="Architecture Diagram">
+    <mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="graph TB
+    subgraph CLIENT[&quot;Client Layer&quot;]
+        B_DASH[&quot;Dashboard&quot;]
+        B_MATCH[&quot;Match Room&quot;]
+    end
+
+    subgraph WEB[&quot;Next.js Web App&quot;]
+        N_AUTH[&quot;Auth API&quot;]
+        N_TOKEN[&quot;Token Exchange API&quot;]
+    end
+
+    subgraph API[&quot;Express API&quot;]
+        subgraph ROUTES[&quot;REST Routes&quot;]
+            R_INTENTS[&quot;IntentsRouter&quot;]
+            R_MATCHES[&quot;MatchesRouter&quot;]
+        end
+
+        subgraph SERVICES[&quot;Domain Services&quot;]
+            SVC_OIS[&quot;OrderIntentService&quot;]
+            SVC_MMS[&quot;MatchmakingService&quot;]
+            SVC_MRS[&quot;MatchRoomService&quot;]
+        end
+
+        subgraph EVENTBUS[&quot;Event Bus&quot;]
+            EB[&quot;DomainEventBus&quot;]
+        end
+
+        subgraph REALTIME[&quot;Realtime Layer&quot;]
+            SH[&quot;SocketHub (Socket.IO)&quot;]
+        end
+
+        subgraph REPOS[&quot;Repositories&quot;]
+            RP_OI[&quot;OrderIntentRepository&quot;]
+            RP_MR[&quot;MatchRoomRepository&quot;]
+        end
+    end
+
+    subgraph DB[&quot;PostgreSQL Database&quot;]
+        TBL_OI[&quot;order_intents&quot;]
+        TBL_MR[&quot;match_rooms&quot;]
+        TBL_MRM[&quot;match_room_members&quot;]
+    end
+
+    B_DASH --&gt; WEB
+    B_MATCH --&gt; WEB
+    B_DASH --&gt;|&quot;REST&quot;| R_INTENTS
+    B_MATCH --&gt;|&quot;REST&quot;| R_MATCHES
+    B_DASH --&gt;|&quot;WS&quot;| SH
+    B_MATCH --&gt;|&quot;WS&quot;| SH
+
+    R_INTENTS --&gt; SVC_OIS
+    R_MATCHES --&gt; SVC_MRS
+
+    SVC_OIS --&gt; SVC_MMS
+    SVC_OIS --&gt; RP_OI
+    SVC_MMS --&gt; RP_OI
+    SVC_MMS --&gt; RP_MR
+    SVC_MRS --&gt; RP_MR
+    SVC_MRS --&gt; RP_OI
+
+    SVC_OIS --&gt; EB
+    SVC_MMS --&gt; EB
+    SVC_MRS --&gt; EB
+
+    EB --&gt;|&quot;notifies&quot;| SH
+
+    RP_OI --&gt; DB
+    RP_MR --&gt; DB
+" style="shape=mxgraph.mermaid;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="800" height="800" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
